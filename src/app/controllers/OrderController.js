@@ -33,18 +33,23 @@ class OrderController {
         where: {
           user_id: userId
         },
-        include: [{
-          model: Event,
-          as: 'event',
-          required: true,
+        raw: true
+      })
+      const allEvents = []
+      for (const order of orders) {
+        const event = await Event.findAll({
+          where: {
+            id: order.event_id
+          },
           include: [{
             model: Company,
             as: 'company',
             required: true
           }]
-        }]
-      })
-      return res.status(200).json(orders)
+        })
+        allEvents.push({ ...order, event: event[0] })
+      }
+      return res.status(200).json(allEvents)
     } catch (e) {
       console.log(e)
       return res.status(500).json({ message: 'Internal Server Error' })
@@ -77,7 +82,10 @@ class OrderController {
       if (!eventFound) {
         return res.status(400).json({ message: 'Event Not Found' })
       }
-      const newOrder = await Order.create({ ...req.body, payed: true })
+      const eventId = eventFound.id
+      const userId = userFound.id
+      const newOrder = await Order.create({ user_id: userId, event_id: eventId, value: req.body.value, payed: true })
+      console.log(newOrder)
       const transport = nodemailerTransport()
       const emailText = `Nova compra realizada por ${userFound.email},  do evento ${eventFound.name}, na data ${eventFound.date} no valor de R$ ${eventFound.value}`
       await transport.sendMail({
