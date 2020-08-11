@@ -4,6 +4,7 @@ import smtpConfig from '../../config/smtp'
 import Order from '../models/Order'
 import User from '../models/User'
 import Event from '../models/Event'
+import Company from '../models/Company'
 
 const nodemailerTransport = () => {
   const transport = nodemailer.createTransport({
@@ -35,12 +36,17 @@ class OrderController {
         include: [{
           model: Event,
           as: 'event',
-          required: true
+          required: true,
+          include: [{
+            model: Company,
+            as: 'company',
+            required: true
+          }]
         }]
       })
-      console.log(orders)
       return res.status(200).json(orders)
     } catch (e) {
+      console.log(e)
       return res.status(500).json({ message: 'Internal Server Error' })
     }
   }
@@ -58,17 +64,33 @@ class OrderController {
     }
     try {
       const userFound = await User.findByPk(req.body.user_id)
+      const eventFound = await Event.findByPk(req.body.event_id, {
+        include: [{
+          model: Company,
+          as: 'company',
+          required: true
+        }]
+      })
       if (!userFound) {
         return res.status(400).json({ message: 'User Not Found' })
       }
+      if (!eventFound) {
+        return res.status(400).json({ message: 'Event Not Found' })
+      }
       const newOrder = await Order.create({ ...req.body, payed: true })
       const transport = nodemailerTransport()
-
+      const emailText = `Nova compra realizada por ${userFound.email},  do evento ${eventFound.name}, na data ${eventFound.date} no valor de R$ ${eventFound.value}`
       await transport.sendMail({
-        text: 'Compra realizada com sucesso',
+        text: emailText,
         subject: 'Compra Altside',
         from: 'noreply@altside.com.br',
         to: userFound.email
+      })
+      await transport.sendMail({
+        text: emailText,
+        subject: 'Nova Compra Altside',
+        from: 'noreply@altside.com.br',
+        to: eventFound.company.email
       })
       return res.status(201).json(newOrder)
     } catch (e) {
@@ -90,17 +112,33 @@ class OrderController {
     }
     try {
       const userFound = await User.findByPk(req.body.user_id)
+      const eventFound = await Event.findByPk(req.body.event_id, {
+        include: [{
+          model: Company,
+          as: 'company',
+          required: true
+        }]
+      })
       if (!userFound) {
         return res.status(400).json({ message: 'User Not Found' })
       }
+      if (!eventFound) {
+        return res.status(400).json({ message: 'Event Not Found' })
+      }
       const newOrder = await Order.create({ ...req.body, payed: false })
       const transport = nodemailerTransport()
-
+      const emailText = `Nova reserva realizada por ${userFound.email},  do evento ${eventFound.name}, na data ${eventFound.date}`
       await transport.sendMail({
-        text: 'Reserva realizada com sucesso',
+        text: emailText,
         subject: 'Reserva Altside',
         from: 'noreply@altside.com.br',
         to: userFound.email
+      })
+      await transport.sendMail({
+        text: emailText,
+        subject: 'Nova Reserva Altside',
+        from: 'noreply@altside.com.br',
+        to: eventFound.company.email
       })
       return res.status(201).json(newOrder)
     } catch (e) {

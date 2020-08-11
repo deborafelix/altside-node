@@ -20,12 +20,14 @@ routes.post('/session', SessionController.store)
 routes.post('/company', CompanyController.store)
 routes.post('/files', upload.single('image'), FileController.store)
 routes.post('/company-session', SessionCompanyController.store)
+routes.get('/event', EventController.index)
 routes.use(authMiddleware)
 
-routes.get('/event', isCompany, EventController.index)
 routes.post('/event', isCompany, EventController.store)
 routes.get('/event/company', isCompany, EventController.getCompanyEvent)
 
 routes.post('/order', isUser, OrderController.store)
+routes.post('/order/book', isUser, OrderController.book)
 routes.get('/order', isUser, OrderController.index)
-module.exports = routes
+
+export default routes

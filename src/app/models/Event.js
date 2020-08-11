@@ -13,13 +13,10 @@ class Event extends Model {
         number: Sequelize.STRING,
         neighborhood: Sequelize.STRING,
         state: Sequelize.STRING,
-        description: Sequelize.STRING,
         value: Sequelize.DOUBLE,
         includeValue: Sequelize.STRING,
         date: Sequelize.DATE,
-        category: Sequelize.STRING,
-        longitude: Sequelize.STRING,
-        latitude: Sequelize.STRING
+        category: Sequelize.STRING
       },
       {
         sequelize
@@ -29,7 +26,7 @@ class Event extends Model {
   }
 
   static associate (models) {
-    this.belongsTo(models.Company, { foreignKey: 'company_id', foreignKeyConstraint: 'companies' })
+    this.belongsTo(models.Company, { foreignKey: { name: 'company_id', field: 'id' }, foreignKeyConstraint: 'companies', as: 'company' })
   }
 }
 
