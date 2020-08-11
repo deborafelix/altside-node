@@ -43,6 +43,6 @@ module.exports = {
   },
 
   down: queryInterface => {
-    // return queryInterface.dropTable('companies')
+    return queryInterface.dropTable('companies')
   }
 }

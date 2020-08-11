@@ -18,7 +18,7 @@ class Order extends Model {
 
   static associate (models) {
     this.belongsTo(models.User, { foreignKey: 'user_id', foreignKeyConstraint: 'users' })
-    this.belongsTo(models.Event, { foreignKey: 'event_id', foreignKeyConstraint: 'events' })
+    this.hasOne(models.Event, { foreignKey: { name: 'event_id', field: 'id' }, constraints: 'id', foreignKeyConstraint: 'events', as: 'event' })
   }
 }
 

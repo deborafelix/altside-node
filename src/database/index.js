@@ -18,9 +18,8 @@ class Database {
   init () {
     this.connection = new Sequelize(databaseConfig)
     models
-      .map(m => {
-        m.init(this.connection)
-      })
+      .map(m => m.init(this.connection))
+      .map(m => m.associate && m.associate(this.connection.models))
   }
 }
 

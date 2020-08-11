@@ -5,10 +5,17 @@ import Company from '../models/Company'
 class EventController {
   async index (req, res) {
     try {
-      const events = await Event.findAll({})
+      const events = await Event.findAll({
+        include: [{
+          model: Company,
+          as: 'company',
+          required: true
+        }]
+      })
 
       return res.status(200).json(events)
     } catch (e) {
+      console.log(e)
       return res
         .status(500)
         .json(
@@ -56,14 +63,10 @@ class EventController {
       value: Yup.number().required(),
       includeValue: Yup.string().required(),
       date: Yup.date().required(),
-      category: Yup.string().required(),
-      latitude: Yup.string().required(),
-      longitude: Yup.string().required()
+      category: Yup.string().required()
     })
-    req.body.date = new Date()
     const test = await schema.isValid(req.body)
     if (!(test)) {
-      console.log(test)
       return res.status(400).json({ error: 'Validation Failed' })
     }
     try {
