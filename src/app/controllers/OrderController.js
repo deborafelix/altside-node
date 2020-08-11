@@ -85,7 +85,6 @@ class OrderController {
       const eventId = eventFound.id
       const userId = userFound.id
       const newOrder = await Order.create({ user_id: userId, event_id: eventId, value: req.body.value, payed: true })
-      console.log(newOrder)
       const transport = nodemailerTransport()
       const emailText = `Nova compra realizada por ${userFound.email},  do evento ${eventFound.name}, na data ${eventFound.date} no valor de R$ ${eventFound.value}`
       await transport.sendMail({
